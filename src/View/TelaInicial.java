@@ -1,57 +1,71 @@
 package View;
+
 import Model.GuiaJogo;
+import dao.GuiaJogoDAO;
+
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.List;
 
 public class TelaInicial extends JFrame {
 
-    private JButton botaoPerfil = new JButton("👤");
-    private JPopupMenu menuPerfil = new JPopupMenu();
-    private JMenuItem itemListagem = new JMenuItem("☰ Listagem");
-    private JMenuItem itemLogout = new JMenuItem("⏻ Logout");
-    private JLabel jogoMaiorHora = new JLabel();
-    private JLabel JogoMenosHoras = new JLabel();
-    private JLabel horasTotais = new JLabel();
-    private ArrayList<GuiaJogo> lista = new ArrayList<>();
+    private final GuiaJogoDAO dao = new GuiaJogoDAO();
+
+    private JButton botaoMenu = new JButton("☰");
+    private JPopupMenu menuOpcoes = new JPopupMenu();
+    private JMenuItem itemPerfil = new JMenuItem("Perfil");
+    private JMenuItem itemListar = new JMenuItem("Listar");
+    private JMenuItem itemSair = new JMenuItem("Sair");
+
+    private JLabel labelMaiorNome = new JLabel("-");
+    private JLabel labelMaiorTempo = new JLabel("-");
+    private JLabel labelMenorNome = new JLabel("-");
+    private JLabel labelMenorTempo = new JLabel("-");
+    private JLabel labelTotalTempo = new JLabel("-");
 
     public TelaInicial() {
-
         setTitle("Guia de Jogos");
         setSize(700, 500);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        JPanel painelTopo = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel painelTopo = new JPanel(new BorderLayout());
         painelTopo.setBackground(new Color(45, 45, 45));
+        painelTopo.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
 
-        botaoPerfil.setBackground(new Color(45, 45, 45));
-        botaoPerfil.setForeground(Color.WHITE);
-        botaoPerfil.setFocusPainted(false);
-        botaoPerfil.setBorderPainted(false);
-        botaoPerfil.setFont(new Font("Arial", Font.PLAIN, 20));
+        JLabel labelTitulo = new JLabel("Guia de Jogos");
+        labelTitulo.setForeground(Color.WHITE);
+        labelTitulo.setFont(new Font("Arial", Font.BOLD, 18));
+        painelTopo.add(labelTitulo, BorderLayout.WEST);
 
-        painelTopo.add(botaoPerfil);
+        botaoMenu.setBackground(new Color(45, 45, 45));
+        botaoMenu.setForeground(Color.WHITE);
+        botaoMenu.setFocusPainted(false);
+        botaoMenu.setBorderPainted(false);
+        botaoMenu.setFont(new Font("Arial", Font.PLAIN, 22));
+        painelTopo.add(botaoMenu, BorderLayout.EAST);
+
         add(painelTopo, BorderLayout.NORTH);
 
-        menuPerfil.add(itemListagem);
-        menuPerfil.addSeparator();
-        menuPerfil.add(itemLogout);
+        menuOpcoes.add(itemPerfil);
+        menuOpcoes.add(itemListar);
+        menuOpcoes.add(itemSair);
 
-        JPanel painelCentro = new JPanel();
-        painelCentro.setBackground(new Color(240, 240, 240));
-        add(painelCentro, BorderLayout.CENTER);
-
-        botaoPerfil.addActionListener(e -> {
-            menuPerfil.show(botaoPerfil, 0, botaoPerfil.getHeight());
+        botaoMenu.addActionListener(e -> {
+            if (menuOpcoes.isVisible()) {
+                menuOpcoes.setVisible(false);
+            } else {
+                menuOpcoes.show(botaoMenu, 0, botaoMenu.getHeight());
+            }
         });
 
-        itemListagem.addActionListener(e -> {
-            new TelaListagem();
-        });
+        itemPerfil.addActionListener(e ->
+                JOptionPane.showMessageDialog(this, "Funcionalidade de perfil em desenvolvimento.", "Perfil", JOptionPane.INFORMATION_MESSAGE));
 
-        itemLogout.addActionListener(e -> {
-            int confirmar = JOptionPane.showConfirmDialog(null,
+        itemListar.addActionListener(e -> new TelaListagem());
+
+        itemSair.addActionListener(e -> {
+            int confirmar = JOptionPane.showConfirmDialog(this,
                     "Deseja realmente sair?", "Logout",
                     JOptionPane.YES_NO_OPTION);
             if (confirmar == JOptionPane.YES_OPTION) {
@@ -60,10 +74,93 @@ public class TelaInicial extends JFrame {
             }
         });
 
+        JPanel painelCentro = new JPanel();
+        painelCentro.setLayout(new BoxLayout(painelCentro, BoxLayout.Y_AXIS));
+        painelCentro.setBackground(new Color(240, 240, 240));
+        painelCentro.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
+
+        painelCentro.add(criarLinha("Maior jogo:", labelMaiorNome, labelMaiorTempo));
+        painelCentro.add(Box.createVerticalStrut(15));
+        painelCentro.add(criarLinha("Menor jogo:", labelMenorNome, labelMenorTempo));
+        painelCentro.add(Box.createVerticalStrut(15));
+        painelCentro.add(criarLinhaTotal("Total de horas:", labelTotalTempo));
+        painelCentro.add(Box.createVerticalStrut(20));
+
+        JLabel labelExplicacao = new JLabel("Isso leva em conta todos os jogos adicionados na sua lista.");
+        labelExplicacao.setFont(new Font("Arial", Font.PLAIN, 11));
+        labelExplicacao.setForeground(Color.GRAY);
+        labelExplicacao.setAlignmentX(Component.LEFT_ALIGNMENT);
+        painelCentro.add(labelExplicacao);
+
+        add(painelCentro, BorderLayout.CENTER);
+
+        carregarEstatisticas();
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
     }
-    private void calcularHoras() {
 
+    private JPanel criarLinha(String descricao, JLabel labelNome, JLabel labelTempo) {
+        JPanel linha = new JPanel(new GridLayout(1, 3, 10, 0));
+        linha.setBackground(new Color(240, 240, 240));
+        linha.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        linha.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel labelDescricao = new JLabel(descricao);
+        labelDescricao.setFont(new Font("Arial", Font.BOLD, 13));
+
+        linha.add(labelDescricao);
+        linha.add(labelNome);
+        linha.add(labelTempo);
+
+        return linha;
+    }
+
+    private JPanel criarLinhaTotal(String descricao, JLabel labelTempo) {
+        JPanel linha = new JPanel(new GridLayout(1, 2, 10, 0));
+        linha.setBackground(new Color(240, 240, 240));
+        linha.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        linha.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel labelDescricao = new JLabel(descricao);
+        labelDescricao.setFont(new Font("Arial", Font.BOLD, 13));
+
+        linha.add(labelDescricao);
+        linha.add(labelTempo);
+
+        return linha;
+    }
+
+    private void carregarEstatisticas() {
+        List<GuiaJogo> lista = dao.getLista();
+
+        if (lista.isEmpty()) {
+            labelMaiorNome.setText("Nenhum jogo cadastrado");
+            labelMaiorTempo.setText("-");
+            labelMenorNome.setText("Nenhum jogo cadastrado");
+            labelMenorTempo.setText("-");
+            labelTotalTempo.setText("0h 0min");
+            return;
+        }
+
+        GuiaJogo maior = lista.get(0);
+        GuiaJogo menor = lista.get(0);
+        int somaMinutos = 0;
+
+        for (GuiaJogo g : lista) {
+            if (g.getTempoDuracaoMinuto() > maior.getTempoDuracaoMinuto()) {
+                maior = g;
+            }
+            if (g.getTempoDuracaoMinuto() < menor.getTempoDuracaoMinuto()) {
+                menor = g;
+            }
+            somaMinutos += g.getTempoDuracaoMinuto();
+        }
+
+        labelMaiorNome.setText(maior.getNomeJogo());
+        labelMaiorTempo.setText(maior.getTempoDuracaoMinuto() + " min");
+        labelMenorNome.setText(menor.getNomeJogo());
+        labelMenorTempo.setText(menor.getTempoDuracaoMinuto() + " min");
+        labelTotalTempo.setText((somaMinutos / 60) + "h " + (somaMinutos % 60) + "min");
     }
 }
