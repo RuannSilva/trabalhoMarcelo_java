@@ -5,6 +5,8 @@ import dao.GuiaJogoDAO;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.util.List;
 
@@ -15,36 +17,27 @@ public class TelaListagem extends JFrame {
     private JTable tabela;
     private DefaultTableModel modelo;
 
-    private JButton botaoAdicionar = new JButton("Adicionar");
-    private JButton botaoEditar = new JButton("Editar");
-    private JButton botaoRemover = new JButton("Remover");
-
     public TelaListagem() {
         setTitle("Lista de Jogos");
-        setSize(600, 400);
+        setSize(650, 400);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        modelo = new DefaultTableModel(new Object[]{"ID", "Nome do Jogo", "Objetivo", "Duração (min)"}, 0) {
+        modelo = new DefaultTableModel(new Object[]{"ID", "Nome do Jogo", "Objetivo", "Duração (min)", "Ações"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false;
+                return column == 4;
             }
         };
 
         tabela = new JTable(modelo);
+        tabela.setRowHeight(28);
+        tabela.getColumn("Ações").setCellRenderer(new BotaoAcoesRenderer());
+        tabela.getColumn("Ações").setCellEditor(new BotaoAcoesEditor());
+        tabela.getColumn("Ações").setMaxWidth(60);
+
         JScrollPane scroll = new JScrollPane(tabela);
         add(scroll, BorderLayout.CENTER);
-
-        JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        painelBotoes.add(botaoAdicionar);
-        painelBotoes.add(botaoEditar);
-        painelBotoes.add(botaoRemover);
-        add(painelBotoes, BorderLayout.SOUTH);
-
-        botaoAdicionar.addActionListener(e -> adicionarJogo());
-        botaoEditar.addActionListener(e -> editarJogo());
-        botaoRemover.addActionListener(e -> removerJogo());
 
         popularTabela();
 
@@ -60,42 +53,13 @@ public class TelaListagem extends JFrame {
                     g.getIdVideo(),
                     g.getNomeJogo(),
                     g.getObjetivo(),
-                    g.getTempoDuracaoMinuto()
+                    g.getTempoDuracaoMinuto(),
+                    "⋮"
             });
         }
     }
 
-    private void adicionarJogo() {
-        JTextField campoNome = new JTextField();
-        JTextField campoObjetivo = new JTextField();
-        JTextField campoDuracao = new JTextField();
-
-        Object[] campos = {
-                "Nome do Jogo:", campoNome,
-                "Objetivo:", campoObjetivo,
-                "Duração (min):", campoDuracao
-        };
-
-        int opcao = JOptionPane.showConfirmDialog(this, campos, "Adicionar Guia de Jogo", JOptionPane.OK_CANCEL_OPTION);
-        if (opcao == JOptionPane.OK_OPTION) {
-            try {
-                int duracao = Integer.parseInt(campoDuracao.getText());
-                GuiaJogo novo = new GuiaJogo(0, duracao, campoObjetivo.getText(), campoNome.getText());
-                dao.adiciona(novo);
-                popularTabela();
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Duração deve ser um número inteiro.", "Erro", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
-    private void editarJogo() {
-        int linha = tabela.getSelectedRow();
-        if (linha == -1) {
-            JOptionPane.showMessageDialog(this, "Selecione um item para editar.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
+    private void editarJogo(int linha) {
         int id = (int) modelo.getValueAt(linha, 0);
         JTextField campoNome = new JTextField((String) modelo.getValueAt(linha, 1));
         JTextField campoObjetivo = new JTextField((String) modelo.getValueAt(linha, 2));
@@ -120,18 +84,62 @@ public class TelaListagem extends JFrame {
         }
     }
 
-    private void removerJogo() {
-        int linha = tabela.getSelectedRow();
-        if (linha == -1) {
-            JOptionPane.showMessageDialog(this, "Selecione um item para remover.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
+    private void removerJogo(int linha) {
         int id = (int) modelo.getValueAt(linha, 0);
         int confirmar = JOptionPane.showConfirmDialog(this, "Deseja realmente remover este item?", "Confirmar", JOptionPane.YES_NO_OPTION);
         if (confirmar == JOptionPane.YES_OPTION) {
             dao.remove(id);
             popularTabela();
+        }
+    }
+
+    private static class BotaoAcoesRenderer extends JButton implements TableCellRenderer {
+        BotaoAcoesRenderer() {
+            setText("⋮");
+            setFocusPainted(false);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            return this;
+        }
+    }
+
+    private class BotaoAcoesEditor extends AbstractCellEditor implements TableCellEditor {
+        private final JButton botao = new JButton("⋮");
+        private int linhaAtual;
+
+        BotaoAcoesEditor() {
+            botao.setFocusPainted(false);
+            botao.addActionListener(e -> {
+                JPopupMenu menu = new JPopupMenu();
+                JMenuItem itemEditar = new JMenuItem("Editar");
+                JMenuItem itemRemover = new JMenuItem("Remover");
+
+                itemEditar.addActionListener(ev -> {
+                    fireEditingStopped();
+                    editarJogo(linhaAtual);
+                });
+                itemRemover.addActionListener(ev -> {
+                    fireEditingStopped();
+                    removerJogo(linhaAtual);
+                });
+
+                menu.add(itemEditar);
+                menu.add(itemRemover);
+                menu.show(botao, 0, botao.getHeight());
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            linhaAtual = row;
+            return botao;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return "⋮";
         }
     }
 }
