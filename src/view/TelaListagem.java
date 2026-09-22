@@ -1,6 +1,6 @@
-package View;
+package view;
 
-import Model.GuiaJogo;
+import model.GuiaJogo;
 import dao.GuiaJogoDAO;
 
 import javax.swing.*;
