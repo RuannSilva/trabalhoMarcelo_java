@@ -2,7 +2,6 @@ package view;
 
 import model.GuiaJogo;
 import dao.GuiaJogoDAO;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
@@ -13,7 +12,6 @@ public class TelaInicial extends JFrame {
 
     private JButton botaoMenu = new JButton("☰");
     private JPopupMenu menuOpcoes = new JPopupMenu();
-    private JMenuItem itemPerfil = new JMenuItem("Perfil");
     private JMenuItem itemListar = new JMenuItem("Listar");
     private JMenuItem itemSair = new JMenuItem("Sair");
 
@@ -24,6 +22,8 @@ public class TelaInicial extends JFrame {
     private JLabel labelTotalTempo = new JLabel("-");
 
     private JButton botaoAdicionar = new JButton("+ Adicionar Jogo");
+    private JButton botaoEditar = new JButton("\uD83D\uDCDD Editar Jogo");
+    private JButton botaoRemover = new JButton("\u2716 Remover Jogo");
 
     public TelaInicial() {
         setTitle("Guia de Jogos");
@@ -49,7 +49,6 @@ public class TelaInicial extends JFrame {
 
         add(painelTopo, BorderLayout.NORTH);
 
-        menuOpcoes.add(itemPerfil);
         menuOpcoes.add(itemListar);
         menuOpcoes.add(itemSair);
 
@@ -60,9 +59,6 @@ public class TelaInicial extends JFrame {
                 menuOpcoes.show(botaoMenu, 0, botaoMenu.getHeight());
             }
         });
-
-        itemPerfil.addActionListener(e ->
-                JOptionPane.showMessageDialog(this, "Funcionalidade de perfil em desenvolvimento.", "Perfil", JOptionPane.INFORMATION_MESSAGE));
 
         itemListar.addActionListener(e -> new TelaListagem());
 
@@ -88,7 +84,7 @@ public class TelaInicial extends JFrame {
         painelCentro.add(criarLinhaTotal("Total de horas:", labelTotalTempo));
         painelCentro.add(Box.createVerticalStrut(20));
 
-        JLabel labelExplicacao = new JLabel("Isso leva em conta todos os jogos adicionados na sua lista.");
+        JLabel labelExplicacao = new JLabel("Total de horas leva em conta todos os jogos adicionados na sua lista.");
         labelExplicacao.setFont(new Font("Arial", Font.PLAIN, 11));
         labelExplicacao.setForeground(Color.GRAY);
         labelExplicacao.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -99,9 +95,26 @@ public class TelaInicial extends JFrame {
         botaoAdicionar.addActionListener(e -> adicionarJogo());
         painelCentro.add(botaoAdicionar);
 
+        painelCentro.add(Box.createVerticalStrut(20));
+        botaoEditar.setAlignmentX(Component.LEFT_ALIGNMENT);
+        botaoEditar.addActionListener(e -> new TelaListagem());
+        painelCentro.add(botaoEditar);
+
+        painelCentro.add(Box.createVerticalStrut(20));
+        botaoRemover.setAlignmentX(Component.LEFT_ALIGNMENT);
+        botaoRemover.addActionListener(e -> new TelaListagem());
+        painelCentro.add(botaoRemover);
+
+        JPanel gradeAcoes = new JPanel(new GridLayout(1, 3, 10, 0));
+        gradeAcoes.add(botaoAdicionar);
+        gradeAcoes.add(botaoEditar);
+        gradeAcoes.add(botaoRemover);
+
         add(painelCentro, BorderLayout.CENTER);
 
         carregarEstatisticas();
+
+      add(gradeAcoes, BorderLayout.SOUTH);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
@@ -187,11 +200,17 @@ public class TelaInicial extends JFrame {
             try {
                 int duracao = Integer.parseInt(campoDuracao.getText());
                 GuiaJogo novo = new GuiaJogo(0, duracao, campoObjetivo.getText(), campoNome.getText());
-                dao.adiciona(novo);
-                carregarEstatisticas();
+                if (campoNome.getText().equals("")) {
+                    JOptionPane.showMessageDialog(null,"NÃO FOI POSSÍVEL ADICIONAR A LISTA! INFORME O NOME DO JOGO..");
+                } else {
+                    dao.adiciona(novo);
+                    carregarEstatisticas();
+                }
+
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Duração deve ser um número inteiro.", "Erro", JOptionPane.ERROR_MESSAGE);
             }
         }
+        }
     }
-}
+

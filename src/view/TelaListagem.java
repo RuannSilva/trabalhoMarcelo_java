@@ -76,8 +76,13 @@ public class TelaListagem extends JFrame {
             try {
                 int duracao = Integer.parseInt(campoDuracao.getText());
                 GuiaJogo editado = new GuiaJogo(id, duracao, campoObjetivo.getText(), campoNome.getText());
-                dao.altera(editado);
-                popularTabela();
+                if (campoNome.getText().equals("")) {
+                    JOptionPane.showMessageDialog(null,"NÃO FOI POSSÍVEL SALVAR! INFORME O NOME DO JOGO..");
+                } else {
+                    dao.altera(editado);
+                    popularTabela();
+                }
+
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Duração deve ser um número inteiro.", "Erro", JOptionPane.ERROR_MESSAGE);
             }
@@ -86,7 +91,7 @@ public class TelaListagem extends JFrame {
 
     private void removerJogo(int linha) {
         int id = (int) modelo.getValueAt(linha, 0);
-        int confirmar = JOptionPane.showConfirmDialog(this, "Deseja realmente remover este item?", "Confirmar", JOptionPane.YES_NO_OPTION);
+        int confirmar = JOptionPane.showConfirmDialog(this, "Deseja realmente remover este item?", "ATENÇÃO", JOptionPane.YES_NO_OPTION);
         if (confirmar == JOptionPane.YES_OPTION) {
             dao.remove(id);
             popularTabela();
