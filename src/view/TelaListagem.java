@@ -2,7 +2,6 @@ package view;
 
 import model.GuiaJogo;
 import dao.GuiaJogoDAO;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
@@ -12,10 +11,12 @@ import java.util.List;
 
 public class TelaListagem extends JFrame {
 
-    private final GuiaJogoDAO dao = new GuiaJogoDAO();
-
+    private GuiaJogoDAO dao = new GuiaJogoDAO();
     private JTable tabela;
     private DefaultTableModel modelo;
+    private JButton botaoAdicionar = new JButton("+ Adicionar Jogo");
+    private JButton botaoEditar = new JButton("\uD83D\uDCDD Editar Jogo");
+    private JButton botaoRemover = new JButton("\u2716 Remover Jogo");
 
     public TelaListagem() {
         setTitle("Lista de Jogos");
@@ -36,6 +37,22 @@ public class TelaListagem extends JFrame {
         tabela.getColumn("Ações").setCellEditor(new BotaoAcoesEditor());
         tabela.getColumn("Ações").setMaxWidth(60);
 
+        JPanel gradeAcoes = new JPanel(new GridLayout(1, 3, 10, 0));
+
+        gradeAcoes.add(botaoAdicionar);
+        botaoAdicionar.addActionListener(e -> adicionarJogo());
+
+        gradeAcoes.add(botaoEditar);
+        botaoEditar.addActionListener(e -> new TelaListagem());
+
+        gradeAcoes.add(botaoRemover);
+        botaoRemover.addActionListener(e -> new TelaListagem());
+
+        add(gradeAcoes, BorderLayout.SOUTH);
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setVisible(true);
+
         JScrollPane scroll = new JScrollPane(tabela);
         add(scroll, BorderLayout.CENTER);
 
@@ -43,7 +60,39 @@ public class TelaListagem extends JFrame {
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
+
     }
+
+    private void adicionarJogo() {
+        JTextField campoNome = new JTextField();
+        JTextField campoObjetivo = new JTextField();
+        JTextField campoDuracao = new JTextField();
+
+        Object[] campos = {
+                "Nome do Jogo:", campoNome,
+                "Objetivo:", campoObjetivo,
+                "Duração (min):", campoDuracao
+        };
+
+        int opcao = JOptionPane.showConfirmDialog(this, campos, "Adicionar Guia de Jogo", JOptionPane.OK_CANCEL_OPTION);
+        if (opcao == JOptionPane.OK_OPTION) {
+            try {
+                int duracao = Integer.parseInt(campoDuracao.getText());
+                GuiaJogo novo = new GuiaJogo(0, duracao, campoObjetivo.getText(), campoNome.getText());
+                if (campoNome.getText().equals("")) {
+                    JOptionPane.showMessageDialog(null,"NÃO FOI POSSÍVEL ADICIONAR A LISTA! INFORME O NOME DO JOGO..");
+                } else {
+                    dao.adiciona(novo);
+                    popularTabela();
+                }
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Duração deve ser um número inteiro.", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+
 
     private void popularTabela() {
         modelo.setRowCount(0);
@@ -76,7 +125,7 @@ public class TelaListagem extends JFrame {
             try {
                 int duracao = Integer.parseInt(campoDuracao.getText());
                 GuiaJogo editado = new GuiaJogo(id, duracao, campoObjetivo.getText(), campoNome.getText());
-                if (campoNome.getText().equals("")) {
+                if (campoNome.getText().equals("") || campoObjetivo.equals("")) {
                     JOptionPane.showMessageDialog(null,"NÃO FOI POSSÍVEL SALVAR! INFORME O NOME DO JOGO..");
                 } else {
                     dao.altera(editado);
@@ -95,6 +144,7 @@ public class TelaListagem extends JFrame {
         if (confirmar == JOptionPane.YES_OPTION) {
             dao.remove(id);
             popularTabela();
+            //COLOCAR FORMA DE FECHAR A TELA DE LISTAGEM QUANDO SALVAR A EDICAO 
         }
     }
 
@@ -147,4 +197,5 @@ public class TelaListagem extends JFrame {
             return "⋮";
         }
     }
+
 }

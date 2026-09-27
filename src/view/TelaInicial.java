@@ -10,20 +10,12 @@ public class TelaInicial extends JFrame {
 
     private final GuiaJogoDAO dao = new GuiaJogoDAO();
 
-    private JButton botaoMenu = new JButton("☰");
-    private JPopupMenu menuOpcoes = new JPopupMenu();
-    private JMenuItem itemListar = new JMenuItem("Listar");
-    private JMenuItem itemSair = new JMenuItem("Sair");
-
+    private JButton botaoListar = new JButton("☰");
     private JLabel labelMaiorNome = new JLabel("-");
     private JLabel labelMaiorTempo = new JLabel("-");
     private JLabel labelMenorNome = new JLabel("-");
     private JLabel labelMenorTempo = new JLabel("-");
     private JLabel labelTotalTempo = new JLabel("-");
-
-    private JButton botaoAdicionar = new JButton("+ Adicionar Jogo");
-    private JButton botaoEditar = new JButton("\uD83D\uDCDD Editar Jogo");
-    private JButton botaoRemover = new JButton("\u2716 Remover Jogo");
 
     public TelaInicial() {
         setTitle("Guia de Jogos");
@@ -34,43 +26,22 @@ public class TelaInicial extends JFrame {
         JPanel painelTopo = new JPanel(new BorderLayout());
         painelTopo.setBackground(new Color(45, 45, 45));
         painelTopo.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
-
-        JLabel labelTitulo = new JLabel("Guia de Jogos");
+        JLabel labelTitulo = new JLabel("Resumo da Lista");
         labelTitulo.setForeground(Color.WHITE);
         labelTitulo.setFont(new Font("Arial", Font.BOLD, 18));
         painelTopo.add(labelTitulo, BorderLayout.WEST);
 
-        botaoMenu.setBackground(new Color(45, 45, 45));
-        botaoMenu.setForeground(Color.WHITE);
-        botaoMenu.setFocusPainted(false);
-        botaoMenu.setBorderPainted(false);
-        botaoMenu.setFont(new Font("Arial", Font.PLAIN, 22));
-        painelTopo.add(botaoMenu, BorderLayout.EAST);
+
+        botaoListar.setBackground(new Color(45, 45, 45));
+        botaoListar.setForeground(Color.WHITE);
+        botaoListar.setFocusPainted(false);
+        botaoListar.setBorderPainted(false);
+        botaoListar.setFont(new Font("Arial", Font.PLAIN, 22));
+        painelTopo.add(botaoListar, BorderLayout.EAST);
 
         add(painelTopo, BorderLayout.NORTH);
 
-        menuOpcoes.add(itemListar);
-        menuOpcoes.add(itemSair);
-
-        botaoMenu.addActionListener(e -> {
-            if (menuOpcoes.isVisible()) {
-                menuOpcoes.setVisible(false);
-            } else {
-                menuOpcoes.show(botaoMenu, 0, botaoMenu.getHeight());
-            }
-        });
-
-        itemListar.addActionListener(e -> new TelaListagem());
-
-        itemSair.addActionListener(e -> {
-            int confirmar = JOptionPane.showConfirmDialog(this,
-                    "Deseja realmente sair?", "Logout",
-                    JOptionPane.YES_NO_OPTION);
-            if (confirmar == JOptionPane.YES_OPTION) {
-                dispose();
-                new TelaLogin();
-            }
-        });
+       botaoListar.addActionListener(e -> new TelaListagem());
 
         JPanel painelCentro = new JPanel();
         painelCentro.setLayout(new BoxLayout(painelCentro, BoxLayout.Y_AXIS));
@@ -90,31 +61,13 @@ public class TelaInicial extends JFrame {
         labelExplicacao.setAlignmentX(Component.LEFT_ALIGNMENT);
         painelCentro.add(labelExplicacao);
 
-        painelCentro.add(Box.createVerticalStrut(20));
-        botaoAdicionar.setAlignmentX(Component.LEFT_ALIGNMENT);
-        botaoAdicionar.addActionListener(e -> adicionarJogo());
-        painelCentro.add(botaoAdicionar);
-
-        painelCentro.add(Box.createVerticalStrut(20));
-        botaoEditar.setAlignmentX(Component.LEFT_ALIGNMENT);
-        botaoEditar.addActionListener(e -> new TelaListagem());
-        painelCentro.add(botaoEditar);
-
-        painelCentro.add(Box.createVerticalStrut(20));
-        botaoRemover.setAlignmentX(Component.LEFT_ALIGNMENT);
-        botaoRemover.addActionListener(e -> new TelaListagem());
-        painelCentro.add(botaoRemover);
-
         JPanel gradeAcoes = new JPanel(new GridLayout(1, 3, 10, 0));
-        gradeAcoes.add(botaoAdicionar);
-        gradeAcoes.add(botaoEditar);
-        gradeAcoes.add(botaoRemover);
 
         add(painelCentro, BorderLayout.CENTER);
 
         carregarEstatisticas();
 
-      add(gradeAcoes, BorderLayout.SOUTH);
+        add(gradeAcoes, BorderLayout.SOUTH);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
