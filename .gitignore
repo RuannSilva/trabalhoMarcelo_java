@@ -31,3 +31,6 @@ out/
 
 # macOS
 .DS_Store
+
+# NÃO APLICAR MEUS DADOS DO BD
+src/db.properties

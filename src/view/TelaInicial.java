@@ -41,7 +41,7 @@ public class TelaInicial extends JFrame {
 
         add(painelTopo, BorderLayout.NORTH);
 
-       botaoListar.addActionListener(e -> new TelaListagem(this :: carregarEstatisticas));
+        botaoListar.addActionListener(e -> new TelaListagem(this :: carregarEstatisticas));
 
         JPanel painelCentro = new JPanel();
         painelCentro.setLayout(new BoxLayout(painelCentro, BoxLayout.Y_AXIS));
@@ -136,34 +136,5 @@ public class TelaInicial extends JFrame {
         labelMenorTempo.setText(menor.getTempoDuracaoMinuto() + " min");
         labelTotalTempo.setText((somaMinutos / 60) + "h " + (somaMinutos % 60) + "min");
     }
-
-    private void adicionarJogo() {
-        JTextField campoNome = new JTextField();
-        JTextField campoObjetivo = new JTextField();
-        JTextField campoDuracao = new JTextField();
-
-        Object[] campos = {
-                "Nome do Jogo:", campoNome,
-                "Objetivo:", campoObjetivo,
-                "Duração (min):", campoDuracao
-        };
-
-        int opcao = JOptionPane.showConfirmDialog(this, campos, "Adicionar Guia de Jogo", JOptionPane.OK_CANCEL_OPTION);
-        if (opcao == JOptionPane.OK_OPTION) {
-            try {
-                int duracao = Integer.parseInt(campoDuracao.getText());
-                GuiaJogo novo = new GuiaJogo(0, duracao, campoObjetivo.getText(), campoNome.getText());
-                if (campoNome.getText().equals("")) {
-                    JOptionPane.showMessageDialog(null,"NÃO FOI POSSÍVEL ADICIONAR A LISTA! INFORME O NOME DO JOGO..");
-                } else {
-                    dao.adiciona(novo);
-                    carregarEstatisticas();
-                }
-
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Duração deve ser um número inteiro.", "Erro", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-        }
-    }
+}
 

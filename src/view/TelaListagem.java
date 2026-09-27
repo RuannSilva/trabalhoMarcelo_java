@@ -80,7 +80,7 @@ public class TelaListagem extends JFrame {
             try {
                 int duracao = Integer.parseInt(campoDuracao.getText());
                 GuiaJogo novo = new GuiaJogo(0, duracao, campoObjetivo.getText(), campoNome.getText());
-                if (campoNome.getText().equals("")) {
+                if (campoNome.getText().trim().isEmpty() || campoObjetivo.getText().trim().isEmpty()) {
                     JOptionPane.showMessageDialog(null,"NÃO FOI POSSÍVEL ADICIONAR A LISTA! INFORME O NOME DO JOGO..");
                 } else {
                     dao.adiciona(novo);
