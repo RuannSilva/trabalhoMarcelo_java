@@ -41,7 +41,7 @@ public class TelaInicial extends JFrame {
 
         add(painelTopo, BorderLayout.NORTH);
 
-       botaoListar.addActionListener(e -> new TelaListagem());
+       botaoListar.addActionListener(e -> new TelaListagem(this :: carregarEstatisticas));
 
         JPanel painelCentro = new JPanel();
         painelCentro.setLayout(new BoxLayout(painelCentro, BoxLayout.Y_AXIS));
