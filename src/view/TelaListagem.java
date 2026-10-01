@@ -1,11 +1,10 @@
 package view;
 
+import com.mysql.cj.callback.MysqlCallbackHandler;
 import model.GuiaJogo;
 import dao.GuiaJogoDAO;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.util.List;
 
@@ -18,6 +17,7 @@ public class TelaListagem extends JFrame {
     private JButton botaoEditar = new JButton("\uD83D\uDCDD Editar Jogo");
     private JButton botaoRemover = new JButton("\u2716 Remover Jogo");
     private final Runnable aoAtualizar;
+
 
     public TelaListagem(Runnable aoAtualizar) {
         setTitle("Lista de Jogos");
@@ -35,7 +35,21 @@ public class TelaListagem extends JFrame {
 
         tabela = new JTable(modelo);
         tabela.setShowGrid(true);
-        tabela.setGridColor(Color.LIGHT_GRAY);  
+        tabela.setGridColor(Color.LIGHT_GRAY); 
+        botaoEditar.setEnabled(false); 
+        botaoRemover.setEnabled(false);
+
+        tabela.getSelectionModel().addListSelectionListener(e -> {
+            if (tabela.getSelectedRow() != -1) {
+                botaoEditar.setEnabled(true);
+                botaoRemover.setEnabled(true);
+            } else {
+                botaoEditar.setEnabled(false);
+                botaoRemover.setEnabled(false);
+            }
+        });
+
+
 
 
         JPanel gradeAcoes = new JPanel(new GridLayout(1, 3, 10, 0));
@@ -93,6 +107,7 @@ public class TelaListagem extends JFrame {
                 JOptionPane.showMessageDialog(this, "Duração deve ser um número inteiro.", "Erro", JOptionPane.ERROR_MESSAGE);
             }
         }
+
     }
 
     private void popularTabela() {
@@ -110,7 +125,6 @@ public class TelaListagem extends JFrame {
 
 
     private void editarJogo() {
-        
         int linha = tabela.getSelectedRow();
         if(linha == -1) {
             JOptionPane.showMessageDialog(this, "Selecione um jogo na lista para editar.", "Aviso", JOptionPane.WARNING_MESSAGE);
@@ -152,19 +166,19 @@ public class TelaListagem extends JFrame {
     private void removerJogo() {
         int linha = tabela.getSelectedRow();
         if (linha == -1) {
-        JOptionPane.showMessageDialog(this, "Selecione um jogo na lista para remover.", "Aviso", JOptionPane.WARNING_MESSAGE);
-        return;
+            JOptionPane.showMessageDialog(this, "Selecione um jogo na lista para remover.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
         }
 
         int id = (int) modelo.getValueAt(linha, 0);
         int confirmar = JOptionPane.showConfirmDialog(this, "Deseja realmente remover este item?", "ATENÇÃO", JOptionPane.YES_NO_OPTION);
+
         if (confirmar == JOptionPane.YES_OPTION) {
             dao.remove(id);
             popularTabela();
             if (aoAtualizar != null) {
-            aoAtualizar.run();
+                aoAtualizar.run();
             }
         }
     }
-
 }
