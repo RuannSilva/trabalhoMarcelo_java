@@ -14,13 +14,20 @@ public class ConnectionFactory {
     private static final String SENHA;
 
     static {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("Driver do MySQL não encontrado no classpath", e);
+        }
+
         Properties props = new Properties();
         try (InputStream input = ConnectionFactory.class.getResourceAsStream("/db.properties")) {
             if (input == null) {
                 throw new RuntimeException("Arquivo db.properties não encontrado. Copie db.properties.example e preencha com suas credenciais.");
             }
             props.load(input);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException("Erro ao carregar db.properties", e);
         }
 
@@ -32,7 +39,8 @@ public class ConnectionFactory {
     public static Connection getConnection() {
         try {
             return DriverManager.getConnection(URL, USUARIO, SENHA);
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new RuntimeException("Erro ao conectar ao banco de dados", e);
         }
     }

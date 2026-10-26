@@ -13,6 +13,7 @@ import java.util.List;
 public class GuiaJogoDAO {
 
     public void adiciona(GuiaJogo guiaJogo) {
+
         String sql = "INSERT INTO guiaJogo (nomeJogo, objetivo, tempoDuracao) VALUES (?, ?, ?)";
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -28,7 +29,8 @@ public class GuiaJogoDAO {
                     guiaJogo.setIdVideo(chaves.getInt(1));
                 }
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new RuntimeException("Erro ao inserir guia de jogo", e);
         }
     }
@@ -50,7 +52,8 @@ public class GuiaJogoDAO {
                 );
                 lista.add(guiaJogo);
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new RuntimeException("Erro ao buscar lista de guias de jogo", e);
         }
 
@@ -68,7 +71,8 @@ public class GuiaJogoDAO {
             stmt.setInt(3, guiaJogo.getTempoDuracaoMinuto());
             stmt.setInt(4, guiaJogo.getIdVideo());
             stmt.execute();
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new RuntimeException("Erro ao atualizar guia de jogo", e);
         }
     }
@@ -81,7 +85,8 @@ public class GuiaJogoDAO {
 
             stmt.setInt(1, id);
             stmt.execute();
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new RuntimeException("Erro ao remover guia de jogo", e);
         }
     }

@@ -33,4 +33,4 @@ out/
 .DS_Store
 
 # NÃO APLICAR MEUS DADOS DO BD
-src/db.properties
+src/main/resources/db.properties
