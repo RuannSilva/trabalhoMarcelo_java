@@ -34,3 +34,5 @@ out/
 
 # NÃO APLICAR MEUS DADOS DO BD
 src/main/resources/db.properties
+
+target/
